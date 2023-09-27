@@ -6,7 +6,6 @@ import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 import MarkerClusterGroup from 'react-leaflet-cluster'
 
-
 let DefaultIcon = L.icon({
   iconUrl: icon,
   shadowUrl: iconShadow,
@@ -21,6 +20,19 @@ const customStyle = {
   weight: 2,               // Border width
   dashArray: '5',          // Dash pattern for the border (5 pixels on, 5 pixels off)
 };
+
+const tiles = {
+  wikimedia: "https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png",
+  cartocdn: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+  arcgisonline_topo: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+  arcgisonline_street: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  arcgisonline: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  nationalmap: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+  stamen: "http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg",
+  stadiamaps: "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png",
+  tile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+}
+
 
 const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downloadOptions }) => {
   const onEachFeature = (feature, layer) => {
@@ -40,15 +52,7 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downlo
     >
       {downloadOptions}
       <TileLayer
-        // url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-        url="https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
-        // url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        // url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-        // url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        // url="https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"
-        // url="http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"
-        // url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-        // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url={tiles.wikimedia}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <MarkerClusterGroup>

@@ -3,7 +3,7 @@ import Filter from './components/Filter';
 import Map from './components/Map';
 import bbox from '@turf/bbox';
 import tokml from "geojson-to-kml";
-import { Container, Grid, Segment, Button, Icon } from 'semantic-ui-react'; // Import Semantic UI components
+import { Header, Container, Grid, Segment, Button, Icon } from 'semantic-ui-react'; // Import Semantic UI components
 
 var togpx = require('togpx');
 
@@ -55,7 +55,8 @@ function App() {
   }
 
   return (
-    <Container fluid>
+    <Container fluid style={{padding: 20}}>
+      <Header as='h1'>Open GeoLens</Header>
       <Grid stackable columns={2}>
         <Grid.Row>
           <Grid.Column width={6}>
