@@ -52,7 +52,7 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downlo
     >
       {downloadOptions}
       <TileLayer
-        url={tiles.wikimedia}
+        url={tiles.tile}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <MarkerClusterGroup>
