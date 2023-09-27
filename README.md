@@ -1,5 +1,7 @@
 # Open GeoLens
 
+https://open-geolens.web.app
+
 ## Available Scripts
 
 In the project directory, you can run:
