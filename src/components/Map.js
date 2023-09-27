@@ -22,11 +22,11 @@ const customStyle = {
   dashArray: '5',          // Dash pattern for the border (5 pixels on, 5 pixels off)
 };
 
-const Map = ({ geoJSONData, district, bounds, district_boundary, _switch }) => {
+const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downloadOptions }) => {
   const onEachFeature = (feature, layer) => {
     if (feature.properties && feature.properties.name) {
       layer.bindPopup(`
-        <b>OSM ID: ${feature.id}<br/><br/>${feature.properties.name}</b><br />
+        <b>ID: ${feature.id.match(/(\d+)/)[0]}<br/><br/>${feature.properties.name}</b><br />
       `);
     }
   };
@@ -38,8 +38,17 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch }) => {
       style={{ height: '500px', width: '100%' }}
       key={_switch}
     >
+      {downloadOptions}
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        // url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+        url="https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png"
+        // url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        // url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+        // url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        // url="https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"
+        // url="http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"
+        // url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+        // url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <MarkerClusterGroup>

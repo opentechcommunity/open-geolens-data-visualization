@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Filter from './components/Filter';
 import Map from './components/Map';
 import bbox from '@turf/bbox';
-import { Container, Grid, Segment } from 'semantic-ui-react'; // Import Semantic UI components
+import tokml from "geojson-to-kml";
+import { Container, Grid, Segment, Button, Icon } from 'semantic-ui-react'; // Import Semantic UI components
+
+var togpx = require('togpx');
 
 function App() {
   const [filteredData, setFilteredData] = useState({});
@@ -28,12 +31,35 @@ function App() {
     setSwitch(!_switch)
   }, [geo_json, district_boundary])
 
+  const downloadFile = (filename, blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename; // Specify the filename
+    a.click();
+  }
+
+  const downloadGeojson = () => {
+    const blob = new Blob([JSON.stringify(geo_json)], { type: 'application/json' });
+    downloadFile('data.geojson', blob)
+  }
+  const downloadKML = () => {
+    const kml = tokml(geo_json);
+    const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+    downloadFile('data.kml', blob)
+  }
+  const downloadGPX = () => {
+    const gpxData = togpx(geo_json)
+    const blob = new Blob([gpxData], { type: 'application/gpx+xml' });
+    downloadFile('data.gpx', blob)
+  }
+
   return (
     <Container fluid>
       <Grid stackable columns={2}>
         <Grid.Row>
           <Grid.Column width={6}>
-            <Segment>
+            <Segment style={{marginTop: '5vh'}}>
               {/* Filter Component */}
               <Filter {...{onFilterChange, geo_json, setGeoJSON, setDistrictBoundary}}/>
             </Segment>
@@ -41,11 +67,23 @@ function App() {
           <Grid.Column width={10}>
             <Segment>
               {/* Map Component */}
-              <Map geoJSONData={geo_json} _switch={_switch} district={filteredData.district} bounds={bounds} district_boundary={district_boundary}/>
+              <Map
+                geoJSONData={geo_json}
+                _switch={_switch}
+                district={filteredData.district}
+                bounds={bounds}
+                district_boundary={district_boundary}
+                downloadOptions={geo_json && geo_json.features.length > 0 && <Segment style={{padding: 5, margin: 5, position: 'absolute', zIndex: 1000, bottom: 0}}>
+                  <Button icon basic labelPosition='right' primary onClick={downloadGeojson}>Export GeoJSON <Icon name='download' /></Button>
+                  <Button icon basic labelPosition='right' primary onClick={downloadKML}>Export KML <Icon name='download' /></Button>
+                  <Button icon basic labelPosition='right' primary onClick={downloadGPX}>Export GPX <Icon name='download' /></Button>
+                </Segment>}
+              />
             </Segment>
           </Grid.Column>
         </Grid.Row>
       </Grid>
+
     </Container>
   );
 }
