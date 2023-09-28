@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from './axiosConfig';
-import { Button, Dropdown, Label, Segment } from 'semantic-ui-react';
+import { Button, Dropdown, Label, Segment, Loader } from 'semantic-ui-react';
 import { ToastContainer, toast } from 'react-toastify';
 
 function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
@@ -125,11 +125,14 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
         });
     }
   }
-
   return (
     <div>
     <ToastContainer />
     <>NEPAL 🇳🇵</>
+    {loading &&
+      (loading && Object.keys(loading).length > 0 && Object.keys(loading).map(i=>loading[i]).indexOf(true) > -1) &&
+      <Loader active inline size="tiny" style={{marginLeft: 20}}/>
+    }
     <h1>
       Get map information for:
     </h1>
