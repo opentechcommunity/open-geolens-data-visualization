@@ -188,7 +188,7 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
     </Segment>
 
     <Segment vertical>
-      <Label>Infrastructure:</Label>
+      <Label>Item / Infrastructure:</Label>
       <Dropdown
         placeholder="Select Data Type"
         placeholder={loading.data_types ? "Loading infrastructure..." : "Select Infrastructure"}
