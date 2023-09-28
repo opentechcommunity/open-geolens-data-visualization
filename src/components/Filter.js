@@ -128,7 +128,7 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
   return (
     <div>
     <ToastContainer />
-    <>NEPAL 🇳🇵</>
+    <>NEPAL 🇳🇵<a style={{float: 'right', textDecoration: 'underline'}} href="https://gautamarjun.com.np/contact">CONTACT</a></>
     {loading &&
       (loading && Object.keys(loading).length > 0 && Object.keys(loading).map(i=>loading[i]).indexOf(true) > -1) &&
       <Loader active inline size="tiny" style={{marginLeft: 20}}/>
