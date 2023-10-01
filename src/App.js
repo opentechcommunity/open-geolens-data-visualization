@@ -84,7 +84,7 @@ function App() {
 
   return (
     <Container fluid style={{padding: 20}}>
-      <Header as='h1'>Open GeoLens [Nepal's data in OpenStreetMap]: Visualize factors related to Human Development</Header>
+      <Header as='h1'>Open GeoLens [Nepal's data in OpenStreetMap]: Visualizing resources of Human Development</Header>
       <Grid stackable columns={2}>
         <Grid.Row>
           <Grid.Column width={6}>
