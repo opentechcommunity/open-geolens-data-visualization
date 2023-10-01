@@ -197,7 +197,7 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
   return (
     <div>
     <ToastContainer />
-    <>NEPAL 🇳🇵<a style={{float: 'right', textDecoration: 'underline'}} href="https://gautamarjun.com.np/contact">CONTACT</a></>
+    <>NEPAL 🇳🇵 | Last Update: Oct 1, 2023<a style={{float: 'right', textDecoration: 'underline'}} href="https://gautamarjun.com.np/contact">CONTACT</a></>
     {loading &&
       (loading && Object.keys(loading).length > 0 && Object.keys(loading).map(i=>loading[i]).indexOf(true) > -1) &&
       <Loader active inline size="tiny" style={{marginLeft: 20}}/>
