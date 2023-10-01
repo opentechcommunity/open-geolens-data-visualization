@@ -280,7 +280,7 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
       disabled={(selectedDataType).length === 0 || loading.geojson}
       loading={loading.geojson}
     >
-      GENERATE
+      GET MAP
     </Button>
   </div>
   );
