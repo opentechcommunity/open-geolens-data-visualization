@@ -8,11 +8,20 @@ import { Header, Container, Grid, Segment, Button, Icon } from 'semantic-ui-reac
 var togpx = require('togpx');
 
 function App() {
+  const init_loading = {
+    districts: true,
+    categories: false,
+    subcategories: false,
+    data_types: false,
+    geojson: false,
+    map: false,
+  }
   const [filteredData, setFilteredData] = useState({});
   const [geo_json, setGeoJSON] = useState();
   const [district_boundary, setDistrictBoundary] = useState();
   const [bounds, setBounds] = useState([[26.6, 84], [30, 86]]);
   const [_switch, setSwitch] = useState(true);
+  const [loading, setLoading] = useState(init_loading)
 
   const onFilterChange = (filters) => {
     const { district, category, subCategory, dataType } = filters;
@@ -62,7 +71,7 @@ function App() {
           <Grid.Column width={6}>
             <Segment style={{marginTop: '5vh'}}>
               {/* Filter Component */}
-              <Filter {...{onFilterChange, geo_json, setGeoJSON, setDistrictBoundary}}/>
+              <Filter {...{onFilterChange, geo_json, setGeoJSON, setDistrictBoundary, loading, setLoading}}/>
             </Segment>
           </Grid.Column>
           <Grid.Column width={10}>
@@ -74,6 +83,7 @@ function App() {
                 district={filteredData.district}
                 bounds={bounds}
                 district_boundary={district_boundary}
+                loading={loading.map || loading.geojson}
                 downloadOptions={geo_json && geo_json.features.length > 0 && <Segment style={{padding: 5, margin: 5, position: 'absolute', zIndex: 1000, bottom: 0}}>
                   <Button icon basic labelPosition='right' primary onClick={downloadGeojson}>Export GeoJSON <Icon name='download' /></Button>
                   <Button icon basic labelPosition='right' primary onClick={downloadKML}>Export KML <Icon name='download' /></Button>

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import L from 'leaflet';
+import { Loader } from 'semantic-ui-react';
+
 import { MapContainer, TileLayer, GeoJSON, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -34,7 +36,7 @@ const tiles = {
 }
 
 
-const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downloadOptions }) => {
+const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downloadOptions, loading }) => {
   const onEachFeature = (feature, layer) => {
     if (feature.properties && feature.properties.name) {
       layer.bindPopup(`
@@ -51,6 +53,8 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downlo
       key={_switch}
     >
       {downloadOptions}
+      {loading && <Loader active inline style={{textAlign: 'center', width: '100%', marginTop: '25%'}}/>}
+
       <TileLayer
         url={tiles.tile}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

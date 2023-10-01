@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import axios from './axiosConfig';
+import axios from 'axios';
 import { Button, Dropdown, Label, Segment, Loader } from 'semantic-ui-react';
 import { ToastContainer, toast } from 'react-toastify';
 
-function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
-  const init_loading = {
-    districts: true,
-    categories: false,
-    subcategories: false,
-    data_types: false,
-    geojson: false,
-  }
-  const [loading, setLoading] = useState(init_loading)
+const JSZip = require('jszip');
+
+
+function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loading, setLoading }) {
   const [districts, setDistricts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -20,18 +15,71 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [selectedDataType, setSelectedDataType] = useState('');
+  const [git_gj_map, setGITGJMap] = useState();
+
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
   useEffect(() => {
-    // Fetch district and category data from your server or file system
-    axios.get('/api/districts').then((response) => {
-      setDistricts(response.data);
-      setLoading({...loading, districts: false})
-    }).catch(e=>setLoading({...loading, districts: false}));
+    const boundaries_name = "https://raw.githubusercontent.com/osmnepaldata/osm-nepal-ogl-data-metadata/main/boundaries.json";
+    const categories_name = "https://raw.githubusercontent.com/osmnepaldata/osm-nepal-ogl-data-metadata/main/categories.json";
+    const git_gj_map_url = 'https://api.github.com/repos/osmnepaldata/osm-nepal-ogl-data-metadata/contents/directory_geojson_mapping.zip?ref=main'
+    axios.get(boundaries_name, {
+        headers: {
+          Accept: "application/octet-stream",
+        },
+        onDownloadProgress: (progressEvent) => {
+          const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          setDownloadProgress(percentage);
+        },
+      })
+      .then((response) => {
+        setDistricts(response.data);
+        setLoading({...loading, districts: false})
+      })
+      .catch((error) => {
+        console.error("Error fetching or extracting the .zip file:", error);
+        setLoading({...loading, categories: false})
+      });
+    // setLoading({...loading, categories: true})
+    axios.get(categories_name, {
+        headers: {
+          Accept: "application/octet-stream",
+        },
+        onDownloadProgress: (progressEvent) => {
+          const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          setDownloadProgress(percentage);
+        },
+      })
+      .then((response) => {
+        setCategories(response.data);
+        // setLoading({...loading, categories: false})
+      })
+      .catch((error) => {
+        console.error("Error fetching or extracting the .zip file:", error);
+        // setLoading({...loading, categories: false})
+      });
+    axios.get(git_gj_map_url)
+      .then(async response => {
+        // Extract and decode the content
+        const encodedContent = response.data.content;
+        const decodedContent = atob(encodedContent);
+        const zip = new JSZip();
+        await zip.loadAsync(decodedContent)
+        const geojsonContent = await zip.files[`directory_geojson_mapping.json`].async('text');
+        const geojson = JSON.parse(geojsonContent);
+        setGITGJMap(geojson)
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
 
-    axios.get('/api/categories').then((response) => {
-      setCategories(response.data);
-    });
   }, []);
+
+  // useEffect(() => {
+  //   axios.get('/api/categories').then((response) => {
+  //     setCategories(response.data);
+  //   });
+  // }, []);
 
   useEffect(() => {
     // Notify the parent component (App.js) when any filter changes
@@ -45,21 +93,34 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
 
   // Event handlers for dropdown selections
 
-  const handleDistrictChange = (e, { value }) => {
+  const handleDistrictChange = async (e, { value }) => {
+    setLoading({...loading, map: true})
     setSelectedDistrict(value);
     setSelectedCategory('')
     setSelectedSubCategory('')
     setSelectedDataType('')
-    if (value) {
-      axios.get(`/api/district/${value}`)
-        .then((response) => {
-          if (response?.data) {
-            setDistrictBoundary(JSON.parse(response.data))
-            setGeoJSON()
-          }
+    const zipUrl = `https://api.github.com/repos/osmnepaldata/osm-nepal-ogl-data-metadata/contents/boundaries/${value}.geojson.zip?ref=main`
+    if (zipUrl) {
+      axios.get(zipUrl)
+        .then(async response => {
+          // Extract and decode the content
+          setLoading({...loading, map: false})
+
+          const encodedContent = response.data.content;
+          const decodedContent = atob(encodedContent);
+          const zip = new JSZip();
+          await zip.loadAsync(decodedContent)
+          const geojsonContent = await zip.files[`${value}.geojson`].async('text');
+          const geojson = JSON.parse(geojsonContent);
+          setDistrictBoundary(geojson)
+          setGeoJSON()
         })
-        .catch((error) => {
+        .catch(error => {
+          setLoading({...loading, map: false})
+          console.error('Error fetching data:', error);
         });
+      // console.log(geojsonDataJson);
+
     }
   };
 
@@ -68,8 +129,9 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
     setSelectedCategory(value);
     setSelectedSubCategory('')
     setSelectedDataType('')
+    const subCatUrl = `https://raw.githubusercontent.com/osmnepaldata/osm-nepal-ogl-data-metadata/main/categorized_infrastructure/${value}.json`
     if (value) {
-      axios.get(`/api/subcategories/${value}`)
+      axios.get(subCatUrl)
         .then((response) => {
           if (response?.data) {
             setSubcategories(response.data);
@@ -85,20 +147,10 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
   };
 
   const handleSubCategoryChange = (e, { value }) => {
-    setLoading({...loading, data_types: true})
     setSelectedSubCategory(value);
     setSelectedDataType('')
     if (value) {
-      axios.get(`/api/data-types/${selectedCategory}/${value}`)
-        .then((response) => {
-          if (response?.data) {
-            setDataTypes(response.data);
-            setLoading({...loading, data_types: false})
-          }
-        })
-        .catch((error) => {
-          setLoading({...loading, data_types: false})
-        });
+      setDataTypes(Object.keys(subcategories[value]));
     } else {
       setDataTypes([]);
     }
@@ -111,17 +163,32 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
   const onSubmit = () => {
     setLoading({...loading, geojson: true})
     const filePath = `${selectedDistrict}__${selectedCategory}__${selectedSubCategory}__${selectedDataType}`;
+    const repos = Object.keys(git_gj_map)
+    const repo_id = repos.map(i=>(git_gj_map[i].map(j=>(j.split('.zip')[0]===filePath)).indexOf(true))).findIndex((element) => element > -1);
+    const repo_name = repos[repo_id]
+    const repoUrl = `https://api.github.com/repos/osmnepaldata/${repo_name}/contents/${filePath}.zip?ref=main`
+
     if (selectedDataType) {
-      axios.get(`/api/geojson/${filePath}`)
-        .then((response) => {
+      axios.get(repoUrl)
+        .then(async response => {
           setLoading({...loading, geojson: false})
-          setGeoJSON(JSON.parse(response.data))
-          if (JSON.parse(response.data).features.length === 0) {
+          const encodedContent = response.data.content;
+          if (response.data.content.length === 0) {
+            toast.info("Data is Missing!")
+          }
+          const decodedContent = atob(encodedContent);
+          const zip = new JSZip();
+          await zip.loadAsync(decodedContent)
+          const geojsonContent = await zip.files[`${filePath}.geojson`].async('text');
+          const geojson = JSON.parse(geojsonContent);
+          setGeoJSON(geojson)
+          if (geojson.features.length === 0) {
             toast.info("Empty Dataset!")
           }
         })
-        .catch((error) => {
+        .catch(error => {
           setLoading({...loading, geojson: false})
+          console.error('Error fetching data:', error);
         });
     }
   }
@@ -176,7 +243,7 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON }) {
         placeholder={loading.subcategories ? "Loading subcategories..." : "Select Sub Category"}
         selection
         search
-        options={subcategories.map((subcategory) => ({
+        options={Object.keys(subcategories).map((subcategory) => ({
           key: subcategory,
           text: subcategory.replace(/_/g, ' ').replace(/^./, subcategory[0].toUpperCase()),
           value: subcategory,
