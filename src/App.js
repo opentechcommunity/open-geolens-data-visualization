@@ -22,6 +22,7 @@ function App() {
   const [bounds, setBounds] = useState([[26.6, 84], [30, 86]]);
   const [_switch, setSwitch] = useState(true);
   const [loading, setLoading] = useState(init_loading)
+  const [large_file, setDataSizeIsLarge] = useState()
 
   const onFilterChange = (filters) => {
     const { district, category, subCategory, dataType } = filters;
@@ -63,6 +64,24 @@ function App() {
     downloadFile('data.gpx', blob)
   }
 
+  const downloadOptions = () => {
+    if (large_file) {
+      return (<Segment style={{padding: 5, margin: 5, position: 'absolute', zIndex: 1000, bottom: 0}}>
+        <Button icon basic labelPosition='right' primary href={large_file}>
+          Download (ZIP File)<Icon name='download' />
+        </Button>
+      </Segment>)
+    } else if (geo_json && geo_json.features.length > 0) {
+      return (<Segment style={{padding: 5, margin: 5, position: 'absolute', zIndex: 1000, bottom: 0}}>
+        <Button icon basic labelPosition='right' primary onClick={downloadGeojson}>Export GeoJSON <Icon name='download' /></Button>
+        <Button icon basic labelPosition='right' primary onClick={downloadKML}>Export KML <Icon name='download' /></Button>
+        <Button icon basic labelPosition='right' primary onClick={downloadGPX}>Export GPX <Icon name='download' /></Button>
+      </Segment>)
+    } else {
+      return <></>
+    }
+  }
+
   return (
     <Container fluid style={{padding: 20}}>
       <Header as='h1'>Open GeoLens [Nepal's data in OpenStreetMap]: Visualize factors related to Human Development</Header>
@@ -71,7 +90,7 @@ function App() {
           <Grid.Column width={6}>
             <Segment style={{marginTop: '5vh'}}>
               {/* Filter Component */}
-              <Filter {...{onFilterChange, geo_json, setGeoJSON, setDistrictBoundary, loading, setLoading}}/>
+              <Filter {...{onFilterChange, geo_json, setGeoJSON, setDistrictBoundary, loading, setLoading, setDataSizeIsLarge}}/>
             </Segment>
           </Grid.Column>
           <Grid.Column width={10}>
@@ -84,11 +103,7 @@ function App() {
                 bounds={bounds}
                 district_boundary={district_boundary}
                 loading={loading.map || loading.geojson}
-                downloadOptions={geo_json && geo_json.features.length > 0 && <Segment style={{padding: 5, margin: 5, position: 'absolute', zIndex: 1000, bottom: 0}}>
-                  <Button icon basic labelPosition='right' primary onClick={downloadGeojson}>Export GeoJSON <Icon name='download' /></Button>
-                  <Button icon basic labelPosition='right' primary onClick={downloadKML}>Export KML <Icon name='download' /></Button>
-                  <Button icon basic labelPosition='right' primary onClick={downloadGPX}>Export GPX <Icon name='download' /></Button>
-                </Segment>}
+                downloadOptions={downloadOptions}
               />
             </Segment>
           </Grid.Column>

@@ -52,7 +52,7 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downlo
       style={{ height: '500px', width: '100%' }}
       key={_switch}
     >
-      {downloadOptions}
+      {downloadOptions()}
       {loading && <Loader active inline style={{textAlign: 'center', width: '100%', marginTop: '25%'}}/>}
 
       <TileLayer

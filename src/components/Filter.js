@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 const JSZip = require('jszip');
 
 
-function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loading, setLoading }) {
+function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loading, setLoading, setDataSizeIsLarge }) {
   const [districts, setDistricts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -119,7 +119,6 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
           setLoading({...loading, map: false})
           console.error('Error fetching data:', error);
         });
-      // console.log(geojsonDataJson);
 
     }
   };
@@ -174,7 +173,10 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
           setLoading({...loading, geojson: false})
           const encodedContent = response.data.content;
           if (response.data.content.length === 0) {
-            toast.info("Data is Missing!")
+            toast.info("Data size is large to render! Download instead.")
+            setDataSizeIsLarge(response.data.download_url)
+          } else {
+            setDataSizeIsLarge()
           }
           const decodedContent = atob(encodedContent);
           const zip = new JSZip();
