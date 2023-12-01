@@ -49,23 +49,23 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downlo
     <MapContainer
       zoom={8}
       bounds={bounds}
-      style={{ height: '80vh', width: '100%' }}
+      style={{ height: '90vh', width: '100%' }}
       key={_switch}
     >
       {downloadOptions()}
-      {loading && <Loader active inline style={{textAlign: 'center', width: '100%', marginTop: '25%'}}/>}
+      {loading && <Loader active inline style={{ textAlign: 'center', width: '100%', marginTop: '25%' }} />}
 
       <TileLayer
         url={tiles.tile}
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <MarkerClusterGroup>
-      {district_boundary && (
-        <GeoJSON data={district_boundary} style={customStyle} />
-      )}
-      {geoJSONData && (
-          <GeoJSON data={geoJSONData} onEachFeature={onEachFeature}/>
-      )}
+        {district_boundary && (
+          <GeoJSON data={district_boundary} style={customStyle} />
+        )}
+        {geoJSONData && (
+          <GeoJSON data={geoJSONData} onEachFeature={onEachFeature} />
+        )}
       </MarkerClusterGroup>
     </MapContainer>
   );
