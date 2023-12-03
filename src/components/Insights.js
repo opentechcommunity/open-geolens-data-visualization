@@ -4,12 +4,12 @@ import HealthServicesInsights from "./InsightsCharts/HealthServicesInsights";
 import TransportationInsights from "./InsightsCharts/TransportationInsights";
 
 const Insights = ({ filteredJsonData, filteredData }) => {
-  if (!filteredJsonData || !filteredJsonData.features || !filteredData) {
-    return <h2>Insights loading...</h2>;
+  const { category, subCategory } = filteredData;
+  if (!filteredJsonData || !filteredJsonData.features || !filteredData || !category || !subCategory) {
+    return <h2>Get Insights for:</h2>;
+
   }
-
-  const { category } = filteredData;
-
+  console.log(filteredData);
   return (
     <div>
       <h2>Insights</h2>
