@@ -100,7 +100,7 @@ function App() {
 
 
           <Grid.Column width={4} >
-            <Segment >
+            <Segment style={{ maxHeight: '100vh', overflowY: 'auto' }}>
               <Insights filteredJsonData={geo_json} filteredData={filteredData} />
 
             </Segment>
@@ -122,7 +122,7 @@ function App() {
         </Grid.Row>
       </Grid>
 
-    </Container>
+    </Container >
   );
 }
 export default App;
