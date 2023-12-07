@@ -3,7 +3,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 const Insights = ({ filteredJsonData, filteredData }) => {
   const [booleanData, setBooleanData] = useState([]);
-  // const [repeatedValues, setRepeatedValues] = useState({});
   const { category, subCategory, dataType } = filteredData;
 
   useEffect(() => {
@@ -41,19 +40,6 @@ const Insights = ({ filteredJsonData, filteredData }) => {
 
     setBooleanData(booleanDataArray);
 
-    // Filtering categorical values for repeated occurrences
-    // const repeatedValues = {};
-    // Object.keys(propertyOccurrences).forEach((key) => {
-    //   repeatedValues[key] = Object.keys(propertyOccurrences[key])
-    //     .filter((value) => propertyOccurrences[key][value] > 1)
-    //     .reduce((acc, value) => {
-    //       acc[value] = propertyOccurrences[key][value];
-    //       return acc;
-    //     }, {});
-    // });
-
-    // setRepeatedValues(repeatedValues);
-
   }, [filteredJsonData, category, subCategory, dataType]);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#BB9CC0', '#FA8742', '#FA7842', '#F23742', '#FG4742'];
@@ -85,7 +71,7 @@ const Insights = ({ filteredJsonData, filteredData }) => {
             </BarChart>
           </ResponsiveContainer>
 
-          <ResponsiveContainer width="100%" height="60%" >
+          {/* <ResponsiveContainer width="100%" height="60%" >
             <PieChart width={400} height={400}>
               <Pie
                 data={booleanData}
@@ -102,22 +88,7 @@ const Insights = ({ filteredJsonData, filteredData }) => {
               </Pie>
               <Legend />
             </PieChart>
-          </ResponsiveContainer>
-          {/* <div>
-            <h1>Categorical Insights</h1>
-            {Object.keys(repeatedValues).map((key) => (
-              <div key={key}>
-
-                <ul>
-                  {Object.entries(repeatedValues[key]).map(([value, count]) => (
-                    <li key={`${key}-${value}`}>
-                      {value} - Count: {count}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div> */}
+          </ResponsiveContainer> */}
         </div>
       ) : (
         <p>Please select District, Category, Subcategory, and Resource/Infrastructure.</p>
