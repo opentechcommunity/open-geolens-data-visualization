@@ -49,7 +49,7 @@ const Map = ({ geoJSONData, district, bounds, district_boundary, _switch, downlo
     <MapContainer
       zoom={8}
       bounds={bounds}
-      style={{ height: '80vh', width: '100%' }}
+      style={{ height: '60vh', width: '100%' }}
       key={_switch}
     >
       {downloadOptions()}

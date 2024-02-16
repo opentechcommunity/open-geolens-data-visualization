@@ -3,9 +3,144 @@ import Filter from './components/Filter';
 import Map from './components/Map';
 import bbox from '@turf/bbox';
 import tokml from "geojson-to-kml";
-import { Header, Container, Grid, Segment, Button, Icon } from 'semantic-ui-react'; // Import Semantic UI components
+import { Header, Card, Container, Grid, Segment, Button, Icon, Statistic } from 'semantic-ui-react'; // Import Semantic UI components
 
+const turf = require('@turf/turf');
 var togpx = require('togpx');
+
+const StatsDisplay = ({ analysisResults }) => {
+  const {
+    overlayResult,
+    aggregatedLengthInKm,
+    counts,
+  } = analysisResults;
+  return (
+    <Card fluid>
+      <Card.Content>
+      <Header as="h2">Feature Analysis</Header>
+      {Object.keys(analysisResults).length === 0 && <h3><i>Generate a map above to get stats</i></h3>}
+      {Object.keys(analysisResults).length > 0 && <Grid columns={3} divided style={{textAlign: 'center'}}>
+        <Grid.Row>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{counts?.points}</Statistic.Value>
+              <Statistic.Label>Points</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{counts?.lines}</Statistic.Value>
+              <Statistic.Label>Lines</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{counts?.polygons}</Statistic.Value>
+              <Statistic.Label>Polygons</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{aggregatedLengthInKm?.toFixed(2)}</Statistic.Value>
+              <Statistic.Label>Total Length of Line (km)</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{overlayResult?.pointOverlapOnPolygonCount}</Statistic.Value>
+              <Statistic.Label>Point Overlaps on Polygon</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{overlayResult?.polygonOverlapOnPolygonCount}</Statistic.Value>
+              <Statistic.Label>Polygon Overlaps on Polygon</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>}
+      </Card.Content>
+    </Card>
+  );
+};
+
+const analyzeGeoJSON = (geojsonInput) => {
+  // Function to calculate distance between two points
+  const calculateDistance = (point1, point2) => {
+    return turf.distance(point1, point2, { units: 'kilometers' });
+  };
+
+  // Function to calculate area and perimeter of a polygon
+  const calculatePolygonStats = (polygon) => {
+    const area = turf.area(polygon);
+    const perimeter = turf.length(polygon, { units: 'kilometers' });
+    return { area, perimeter };
+  };
+
+  // Function to perform overlay analysis
+  const overlayAnalysis = (features) => {
+    const points = features.filter((feature) => feature.geometry.type === 'Point');
+    const polygons = features.filter((feature) => feature.geometry.type === 'Polygon');
+
+    // Initialize counters for overlapping points and polygons
+    let pointOverlapOnPolygonCount = 0;
+    let polygonOverlapOnPolygonCount = 0;
+    // Iterate through each point and polygon feature
+    points.forEach((point) => {
+      polygons.forEach((polygon) => {
+        if (turf.booleanPointInPolygon(point.geometry.coordinates, polygon)) {
+          pointOverlapOnPolygonCount++;
+        }
+      });
+    });
+
+    // Iterate through each pair of polygons to check for overlaps
+    for (let i = 0; i < polygons.length; i++) {
+      for (let j = i + 1; j < polygons.length; j++) {
+        if (turf.booleanOverlap(polygons[i], polygons[j])) {
+          polygonOverlapOnPolygonCount++;
+        }
+      }
+    }
+
+    return { pointOverlapOnPolygonCount, polygonOverlapOnPolygonCount };
+  };
+
+  const calculateAggregatedLength = (features) => {
+    const lineStrings = features.filter((feature) => feature.geometry.type === 'LineString');
+
+    // Calculate the aggregated length
+    const aggregatedLengthInKm = lineStrings.reduce((totalLength, lineString) => {
+      return totalLength + turf.length(lineString.geometry, { units: 'kilometers' });
+    }, 0);
+
+    return aggregatedLengthInKm;
+  };
+
+  // Main function
+  const generateStats = () => {
+    const features = geojsonInput.features;
+
+    const overlayResult = overlayAnalysis(features);
+    const aggregatedLengthInKm = calculateAggregatedLength(features);
+
+    const counts = {
+      points: features.filter((feature) => feature.geometry.type === 'Point').length,
+      lines: features.filter((feature) => feature.geometry.type === 'LineString').length,
+      polygons: features.filter((feature) => feature.geometry.type === 'Polygon').length,
+    };
+    return {
+      overlayResult,
+      aggregatedLengthInKm,
+      counts,
+    };
+  };
+
+  // Call the main function
+  return generateStats();
+};
 
 function App() {
   const init_loading = {
@@ -17,6 +152,7 @@ function App() {
     map: false,
   }
   const [filteredData, setFilteredData] = useState({});
+  const [analysisResults, setAnalysisResults] = useState({});
   const [geo_json, setGeoJSON] = useState();
   const [district_boundary, setDistrictBoundary] = useState();
   const [bounds, setBounds] = useState([[26.6, 84], [30, 86]]);
@@ -36,6 +172,13 @@ function App() {
         const corner2 = [bboxArray[3], bboxArray[2]];
         if (isFinite(bboxArray[0]) && isFinite(bboxArray[1]) && isFinite(bboxArray[2]) && isFinite(bboxArray[3])) {
           setBounds([corner2, corner1])
+        }
+        try {
+          const analysis = analyzeGeoJSON(geo_json);
+          setAnalysisResults(analysis)
+        } catch (e) {
+          setAnalysisResults({})
+          console.log(e);
         }
     }
     setSwitch(!_switch)
@@ -106,7 +249,10 @@ function App() {
                 downloadOptions={downloadOptions}
               />
             </Segment>
+            <StatsDisplay analysisResults={analysisResults} />
           </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
         </Grid.Row>
       </Grid>
 

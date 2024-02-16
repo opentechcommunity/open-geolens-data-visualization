@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@turf/bbox": "^6.5.0",
     "@turf/bbox-polygon": "^6.5.0",
+    "@turf/turf": "^6.5.0",
     "axios": "^1.5.1",
     "geojson-to-kml": "^0.0.1",
     "jszip": "^3.10.1",
