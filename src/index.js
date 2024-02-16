@@ -7,7 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactGA from 'react-ga';
 
-ReactGA.initialize();
+ReactGA.initialize('G-ZHVXG4KHST');
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
