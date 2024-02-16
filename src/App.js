@@ -13,6 +13,7 @@ const StatsDisplay = ({ analysisResults }) => {
     overlayResult,
     aggregatedLengthInKm,
     counts,
+    total_boundary_area
   } = analysisResults;
   return (
     <Card fluid>
@@ -21,6 +22,12 @@ const StatsDisplay = ({ analysisResults }) => {
       {Object.keys(analysisResults).length === 0 && <h3><i>Generate a map above to get stats</i></h3>}
       {Object.keys(analysisResults).length > 0 && <Grid columns={3} divided style={{textAlign: 'center'}}>
         <Grid.Row>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{total_boundary_area.toFixed(2)}</Statistic.Value>
+              <Statistic.Label>Area Selected (km<sup>2</sup>)</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
           <Grid.Column>
             <Statistic>
               <Statistic.Value>{counts?.points}</Statistic.Value>
@@ -33,14 +40,14 @@ const StatsDisplay = ({ analysisResults }) => {
               <Statistic.Label>Lines</Statistic.Label>
             </Statistic>
           </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
           <Grid.Column>
             <Statistic>
               <Statistic.Value>{counts?.polygons}</Statistic.Value>
               <Statistic.Label>Polygons</Statistic.Label>
             </Statistic>
           </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
           <Grid.Column>
             <Statistic>
               <Statistic.Value>{aggregatedLengthInKm?.toFixed(2)}</Statistic.Value>
@@ -53,10 +60,38 @@ const StatsDisplay = ({ analysisResults }) => {
               <Statistic.Label>Point Overlaps on Polygon</Statistic.Label>
             </Statistic>
           </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
           <Grid.Column>
             <Statistic>
               <Statistic.Value>{overlayResult?.polygonOverlapOnPolygonCount}</Statistic.Value>
               <Statistic.Label>Polygon Overlaps on Polygon</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{(counts?.points/total_boundary_area).toFixed(2)}</Statistic.Value>
+              <Statistic.Label>Points Density (counts/km<sup>2</sup>)</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{(counts?.polygons/total_boundary_area).toFixed(2)}</Statistic.Value>
+              <Statistic.Label>Polygon Density (counts/km<sup>2</sup>)</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{(counts?.lines/total_boundary_area).toFixed(2)}</Statistic.Value>
+              <Statistic.Label>Line Density (counts/km<sup>2</sup>)</Statistic.Label>
+            </Statistic>
+          </Grid.Column>
+          <Grid.Column>
+            <Statistic>
+              <Statistic.Value>{(aggregatedLengthInKm?.toFixed(2)/total_boundary_area).toFixed(2)}</Statistic.Value>
+              <Statistic.Label>Line length (in km) per km<sup>2</sup></Statistic.Label>
             </Statistic>
           </Grid.Column>
         </Grid.Row>
@@ -66,7 +101,7 @@ const StatsDisplay = ({ analysisResults }) => {
   );
 };
 
-const analyzeGeoJSON = (geojsonInput) => {
+const analyzeGeoJSON = (district_boundary, geojsonInput) => {
   // Function to calculate distance between two points
   const calculateDistance = (point1, point2) => {
     return turf.distance(point1, point2, { units: 'kilometers' });
@@ -119,12 +154,18 @@ const analyzeGeoJSON = (geojsonInput) => {
     return aggregatedLengthInKm;
   };
 
+  const calculateGeoJSONArea = (geojson) => {
+    const area = turf.area(geojson) / 1e6; // Convert square meters to square kilometers
+    return area;
+  };
+
   // Main function
   const generateStats = () => {
     const features = geojsonInput.features;
 
     const overlayResult = overlayAnalysis(features);
     const aggregatedLengthInKm = calculateAggregatedLength(features);
+    const total_boundary_area = calculateGeoJSONArea(district_boundary)
 
     const counts = {
       points: features.filter((feature) => feature.geometry.type === 'Point').length,
@@ -135,6 +176,7 @@ const analyzeGeoJSON = (geojsonInput) => {
       overlayResult,
       aggregatedLengthInKm,
       counts,
+      total_boundary_area,
     };
   };
 
@@ -174,7 +216,7 @@ function App() {
           setBounds([corner2, corner1])
         }
         try {
-          const analysis = analyzeGeoJSON(geo_json);
+          const analysis = analyzeGeoJSON(district_boundary, geo_json);
           setAnalysisResults(analysis)
         } catch (e) {
           setAnalysisResults({})
