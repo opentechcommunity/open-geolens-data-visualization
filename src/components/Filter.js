@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Dropdown, Label, Segment, Loader } from 'semantic-ui-react';
 import { ToastContainer, toast } from 'react-toastify';
+import ReactGA from 'react-ga';
 
 const JSZip = require('jszip');
 
@@ -94,6 +95,11 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
   // Event handlers for dropdown selections
 
   const handleDistrictChange = async (e, { value }) => {
+    ReactGA.event({
+      category: 'District Selection',
+      action: 'Click',
+      label: value, // optional
+    });
     setLoading({...loading, map: true})
     setSelectedDistrict(value);
     setSelectedCategory('')
@@ -124,6 +130,11 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
   };
 
   const handleCategoryChange = (e, { value }) => {
+    ReactGA.event({
+      category: 'Category Selection',
+      action: 'Click',
+      label: value, // optional
+    });
     setLoading({...loading, subcategories: true})
     setSelectedCategory(value);
     setSelectedSubCategory('')
@@ -146,6 +157,11 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
   };
 
   const handleSubCategoryChange = (e, { value }) => {
+    ReactGA.event({
+      category: 'Subcategory Selection',
+      action: 'Click',
+      label: value, // optional
+    });
     setSelectedSubCategory(value);
     setSelectedDataType('')
     if (value) {
@@ -156,10 +172,19 @@ function Filter({ setDistrictBoundary, onFilterChange, geo_json, setGeoJSON, loa
   };
 
   const handleDataTypeChange = (e, { value }) => {
+    ReactGA.event({
+      category: 'Resource Selection',
+      action: 'Click',
+      label: value, // optional
+    });
     setSelectedDataType(value);
   };
 
   const onSubmit = () => {
+    ReactGA.event({
+      category: 'Generate Map',
+      action: 'Click',
+    });
     setLoading({...loading, geojson: true})
     const filePath = `${selectedDistrict}__${selectedCategory}__${selectedSubCategory}__${selectedDataType}`;
     const repos = Object.keys(git_gj_map)
